@@ -1,20 +1,25 @@
 # Тестовое задание
 ## Инструкция по разворачиванию локально
-git clone https://github.com/Wafflya/test_task.git
 
-cd ./test_task/
+1. Клонируем репозиторий
+`git clone https://github.com/Wafflya/test_task.git`
 
-python -m venv venv
+2. Переходим в папку проекта
+`cd ./test_task/`
+3. Создаём виртаульную машину 
+`python -m venv venv`
 
-venv\Scripts\activate  или  sourse venv/bin/activate
+ 
+4. Активируем
+`venv\Scripts\activate` (Win) или  `sourse venv/bin/activate`  (Linux)
 
-pip install -r requirements.txt
+4. `pip install -r requirements.txt`
 
-python user_polls\manage.py makemigrations 
+5. `python user_polls\manage.py makemigrations `
 
 
-python user_polls\manage.py migrate
+`python user_polls\manage.py migrate`
 
-python user_polls\manage.py createsuperuser
+`python user_polls\manage.py createsuperuser`
 
-python user_polls\manage.py runserver
+`python user_polls\manage.py runserver`
