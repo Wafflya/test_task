@@ -175,4 +175,3 @@ class AnsweredPollDetailSerializer(serializers.ModelSerializer):
         model = Poll
         exclude = ('id',)
 
-# class CreateCompletedPoll(serializers.Serializer):

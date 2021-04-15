@@ -28,28 +28,6 @@ class AdminAPIView(APIView):
     permission_classes = [IsAdminUser]
 
 
-""""
-    def get(self, request, format=None):
-        content = {
-            'user': str(request.user),  # `django.contrib.auth.User` instance.
-            'auth': str(request.auth),  # None
-        }
-        return Response(content)
-
-    def authenticate(self, request):
-        username = request.META.get('HTTP_X_USERNAME')
-        if not username:
-            return None
-
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            raise exceptions.AuthenticationFailed('No such user')
-
-        return (user, None)
-"""
-
-
 class ActivePollsListView(APIView):
 
     def get(self, request):
