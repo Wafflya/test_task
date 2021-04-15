@@ -26,4 +26,5 @@
  `python user_polls\manage.py createsuperuser`
 ### 9. Запускаем сервер 
 `python user_polls\manage.py runserver`
-### 10. Готово
+### 10. Готово! Документацию по использованию смотреть здесь:
+https://github.com/Wafflya/test_task/blob/master/API_doc.md
