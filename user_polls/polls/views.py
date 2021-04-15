@@ -187,6 +187,10 @@ class PollDetail(APIView):
                 raise exceptions.ValidationError('Вы не ответили на один из вопросов')
 
             if q.type == "OP":
+                try:
+                    test_val = int(request.data[i])
+                except ValueError:
+                    raise exceptions.ValidationError("Не числовое значение в варианте ответа")
                 if get_object_or_404(Option, id=int(request.data[i])) in q.options.all():
                     Answer.objects.create(polled=p, question=q,
                                           reply=get_object_or_404(Option, id=int(request.data[i])))
@@ -212,22 +216,23 @@ class MyAnswers(APIView):
             return redirect('polls:anon_ans', pk=0)
         else:
             auth_user = Participant.objects.filter(respondent_user=request.user)
-            polls = []
 
-            result = []
+            result2 = []
             for i in auth_user:
-                polls.append(i.completed_poll)
                 result = AnsweredPollDetailSerializer(i.completed_poll).data
                 result['questions_in_poll'] = []
                 ans_dict = {}
-                for j in i.completed_poll.questions_in_poll.all():
-                    ans_dict[j.text] = get_object_or_404(Answer, question=j, polled=i).reply
+                for n, j in enumerate(i.completed_poll.questions_in_poll.all()):
+                    anss = str(n + 1) + '. ' + str(j.text)
+                    try:
+                        a = Answer.objects.get(question=j, polled=i).reply
+                        ans_dict[anss] = a
+                    except ObjectDoesNotExist:
+                        ans_dict[anss] = "Не ответил"
                 result['questions_in_poll'] = [ans_dict]
+                result2.append(result)
 
-                # ans.append(Answer.objects.filter(question=j, polled=auth_user).first)
-                # print(ans)
-                # ans.append(Answer.objects.filter(polled=auth_user))
-        return Response(result)
+        return Response(result2)
 
 
 class MyAnonAnswers(APIView):
@@ -235,7 +240,6 @@ class MyAnonAnswers(APIView):
         if pk == 0:
             return Response("Не указан id пользователя в url", status=400)
         anon_user = Participant.objects.filter(respondent_id=pk)
-        polls = []
 
         result2 = []
 
@@ -243,9 +247,13 @@ class MyAnonAnswers(APIView):
             result = AnsweredPollDetailSerializer(i.completed_poll).data
             result['questions_in_poll'] = []
             ans_dict = {}
-            for n,j in enumerate(i.completed_poll.questions_in_poll.all()):
-                anss = str(n+1)+'. '+str(j.text)
-                ans_dict[anss] = get_object_or_404(Answer, question=j, polled=i).reply
+            for n, j in enumerate(i.completed_poll.questions_in_poll.all()):
+                anss = str(n + 1) + '. ' + str(j.text)
+                try:
+                    a = Answer.objects.get(question=j, polled=i).reply
+                    ans_dict[anss] = a
+                except ObjectDoesNotExist:
+                    ans_dict[anss] = "Не ответил"
             result['questions_in_poll'] = [ans_dict]
             result2.append(result)
         return Response(result2)

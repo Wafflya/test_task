@@ -69,6 +69,9 @@ class QuestionCreateSerializer(serializers.ModelSerializer):
                                     type=validated_data['type'])
 
         if validated_data['type'] == 'OP' or validated_data['type'] == 'MP':
+            if 'options' not in validated_data:
+                q.delete()
+                raise exceptions.ValidationError('Для вопроса с выбором не задан параметр options')
             for opt in validated_data['options']:
                 Option.objects.create(question=q, text=opt)
 
@@ -108,6 +111,9 @@ class QuestionEditSerializer(serializers.Serializer):
                 instance.type = validated_data.get('type', instance.type)
                 for i in instance.options.all():
                     i.delete()
+            elif validated_data.get('type') in ('OP', 'MP') and instance.type == 'TX':
+                if 'options' not in validated_data:
+                    raise exceptions.ValidationError('Укажите опции для вопроса с выбором')
             else:
                 instance.type = validated_data.get('type', instance.type)
         elif 'options' in validated_data and instance.type in ('OP', 'MP'):
@@ -123,7 +129,7 @@ class QuestionEditSerializer(serializers.Serializer):
 class OptionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = ('__all__')
+        exclude = ('question',)
 
 
 class QuestionDetailSerializer(serializers.ModelSerializer):
@@ -157,8 +163,6 @@ class AnsweredQuestionDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ('text', 'type', 'answers',)
-
-
 
 
 class AnsweredPollDetailSerializer(serializers.ModelSerializer):
