@@ -166,20 +166,35 @@ class PollDetail(APIView):
 
             if q.type == "OP":
                 try:
-                    test_val = int(request.data[i])
+                    val = Option.objects.get(id=int(request.data[i]))
                 except ValueError:
                     raise exceptions.ValidationError("Не числовое значение в варианте ответа")
-                if get_object_or_404(Option, id=int(request.data[i])) in q.options.all():
+                except ObjectDoesNotExist:
+                    raise exceptions.ValidationError("Не существует выбранного варианта вообще")
+
+                if val in q.options.all():
                     Answer.objects.create(polled=p, question=q,
-                                          reply=get_object_or_404(Option, id=int(request.data[i])))
+                                          reply=val)
                 else:
                     raise exceptions.ValidationError("Нет такого варианта в вопросе")
             if q.type == "TX":
                 Answer.objects.create(polled=p, question=q, reply=request.data[i])
             if q.type == "MP":
                 str_ans = []
-                for j in str(request.data[i]).split(','):
-                    if get_object_or_404(Option, id=int(j)) not in q.options.all():
+                try:
+                    chooses = set(int(i) for i in str(request.data[i]).split(','))
+                except ValueError:
+                    raise exceptions.ValidationError("Неверный формат ответа на вопрос типа MP")
+
+                for j in chooses:
+                    try:
+                        val = Option.objects.get(id=int(j))
+                    except ValueError:
+                        raise exceptions.ValidationError("Не числовое значение в варианте ответа")
+                    except ObjectDoesNotExist:
+                        raise exceptions.ValidationError("Не существует выбранного варианта вообще")
+
+                    if val not in q.options.all():
                         raise exceptions.ValidationError("Нет такого варианта в заданном вопросе")
                     else:
                         str_ans.append(get_object_or_404(Option, id=int(j)).text)
